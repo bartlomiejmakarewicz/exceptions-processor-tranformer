@@ -1,2 +1,10 @@
 app:
   routing-header: exchange
+spring:
+  cloud:
+    stream:
+      bindings:
+        input:
+          destination: processor
+        output:
+          destination: transformer

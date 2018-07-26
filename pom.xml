@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.grapeup</groupId>
-    <artifactId>exceptions-processor-transformer</artifactId>
+    <artifactId>exceptions-processor-errorHeaderExtractionTransformer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>exceptions-processor-transformer</name>
+    <name>exceptions-processor-errorHeaderExtractionTransformer</name>
     <description>Demo project for Spring Boot</description>
 
     <parent>

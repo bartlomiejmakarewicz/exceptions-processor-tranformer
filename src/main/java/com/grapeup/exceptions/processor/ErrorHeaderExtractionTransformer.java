@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Message> {
 
   @Value("${app.routing-header}")
-  private static final String HEADER_KEY = "exchange";
+  private final String HEADER_KEY = "exchange";
 
   @Override
   public Message transform(Message message) {

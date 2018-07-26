@@ -64,11 +64,20 @@ class CustomTransformer implements GenericTransformer<Message, Message> {
       return message;
     }
     if (message instanceof ErrorMessage) {
-      String exchange = getExchangeHeader((ErrorMessage) message);
+      ErrorMessage errorMessage = (ErrorMessage) message;
+      String exchange = getExchangeHeader(errorMessage);
+      if (exchange != null) {
+        MessageHeaders headers = new MutableMessageHeaders(errorMessage.getHeaders());
+        headers.put(ROUTING_KEY, exchange);
+        return new ErrorMessage(errorMessage.getPayload(), headers, errorMessage.getOriginalMessage());
+      }
+    }
+    if (message.getPayload() instanceof MessagingException) {
+      String exchange = getExchangeHeader((MessagingException) message.getPayload());
       if (exchange != null) {
         MessageHeaders headers = new MutableMessageHeaders(message.getHeaders());
         headers.put(ROUTING_KEY, exchange);
-        return new GenericMessage<>("Error occurred!", headers);
+        return new GenericMessage<>(message.getPayload(), headers);
       }
     }
     throw new RuntimeException("Routing header is not present");
@@ -84,7 +93,10 @@ class CustomTransformer implements GenericTransformer<Message, Message> {
     }
     if (errorMessage.getOriginalMessage() != null) {
       if (errorMessage.getOriginalMessage().getHeaders().containsKey(ROUTING_KEY)) {
-        return errorMessage.getOriginalMessage().getHeaders().get(ROUTING_KEY, String.class);
+        String exchange = errorMessage.getOriginalMessage().getHeaders().get(ROUTING_KEY, String.class);
+        if (exchange != null) {
+          return exchange;
+        }
       } else if (errorMessage.getOriginalMessage() instanceof ErrorMessage) {
         String exchange = getExchangeHeader((ErrorMessage) errorMessage.getOriginalMessage());
         if (exchange != null) {
@@ -96,8 +108,12 @@ class CustomTransformer implements GenericTransformer<Message, Message> {
   }
 
   private String getExchangeHeader(MessagingException messagingException) {
-    if (messagingException.getFailedMessage().getHeaders().containsKey(ROUTING_KEY)) {
-      return messagingException.getFailedMessage().getHeaders().get(ROUTING_KEY, String.class);
+    if (messagingException.getFailedMessage() != null
+            && messagingException.getFailedMessage().getHeaders().containsKey(ROUTING_KEY)) {
+      String exchange = messagingException.getFailedMessage().getHeaders().get(ROUTING_KEY, String.class);
+      if (exchange != null) {
+        return exchange;
+      }
     }
     if (messagingException.getCause() instanceof MessagingException) {
       String exchange = getExchangeHeader((MessagingException) messagingException.getCause());

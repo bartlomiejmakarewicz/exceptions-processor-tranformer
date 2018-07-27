@@ -31,44 +31,53 @@ public class ExceptionsProcessorTransformerApplicationTest {
   private MessageCollector messageCollector;
 
   @Test(expected = RuntimeException.class)
-  public void whenMessageWithoutRoutingHeaderIsSentToInput_exceptionIsThrown() {
+  public void givenMessageWithoutRoutingHeader_whenMessageProcessed_thenExceptionIsThrown() {
     processor.input().send(new GenericMessage<>("message without routing header"));
   }
 
   @Test
-  public void whenMessageWithRoutingHeaderIsSentToInput_thenProcessItToJson() throws IOException {
+  public void givenMessageWithRoutingHeader_whenMessageIsProcessed_thenValidMessageIsSentToOutput() throws IOException {
+    // given
     Map<String, Object> headers = Collections.singletonMap(HEADER_KEY, "routing header");
     Message messageSent = new GenericMessage<>("message with routing header", headers);
+
+    // when
     processor.input().send(messageSent);
 
+    // then
     Message messageReceived = messageCollector.forChannel(processor.output()).poll();
-
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.readValue(messageReceived.getPayload().toString(), messageSent.getPayload().getClass());
   }
 
   @Test
-  public void whenErrorMessageWithRoutingHeaderIsSentToInput_thenProcessItToJson() throws IOException {
+  public void givenErrorMessageWithRoutingHeader_whenMessageIsProcessed_thenValidMessageIsSentToOutput() throws IOException {
+    // given
     Map<String, Object> headers = Collections.singletonMap(HEADER_KEY, "routing header");
     Message messageSent = new ErrorMessage(new RuntimeException("some messaging exception"), headers);
+
+    // when
     processor.input().send(messageSent);
 
+    // then
     Message messageReceived = messageCollector.forChannel(processor.output()).poll();
-
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.readValue(messageReceived.getPayload().toString(), messageSent.getPayload().getClass());
   }
 
   @Test
-  public void whenErrorMessageWithoutRoutingHeaderIsSentToInput_thenFindHeaderInOriginalMessage() throws IOException {
+  public void givenErrorMessageWithOriginalMessage_whenMessageIsProcessed_thenValidMessageIsSentToOutput() throws IOException {
+    // given
     Map<String, Object> headers = Collections.singletonMap(HEADER_KEY, "routing header");
     Message originalMessage = new GenericMessage<>(new String[]{"message with routing header"}, headers);
     headers = Collections.emptyMap();
     Message messageSent = new ErrorMessage(new RuntimeException("some messaging exception"), headers, originalMessage);
+
+    // when
     processor.input().send(messageSent);
 
+    // then
     Message messageReceived = messageCollector.forChannel(processor.output()).poll();
-
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.readValue(messageReceived.getPayload().toString(), messageSent.getPayload().getClass());
   }

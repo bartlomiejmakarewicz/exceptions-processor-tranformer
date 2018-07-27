@@ -3,6 +3,7 @@ package com.grapeup.exceptions.processor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -18,7 +19,7 @@ public class ErrorHeaderExtractionTransformerTest {
 
   private final String headerKey = "exchange";
 
-  private ErrorHeaderExtractionTransformer transformer;
+  private final ErrorHeaderExtractionTransformer transformer;
 
   private Map<String, Object> headers() {
     return Collections.singletonMap(headerKey, "routing header");
@@ -34,7 +35,7 @@ public class ErrorHeaderExtractionTransformerTest {
     Message<String> message = new GenericMessage<>("message without routing header");
 
     // when
-    Message messageTransformed = transformer.transform(message);
+    transformer.transform(message);
 
     // then
     // RuntimeException is thrown
@@ -67,4 +68,47 @@ public class ErrorHeaderExtractionTransformerTest {
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 
+  @Test
+  public void givenErrorMessageWithFailedMessage_whenPassedToTransformer_thenValidMessageIsReturned() {
+    // given
+    Message<String> originalMessage = new GenericMessage<>("message with routing header", headers());
+    Message message = new ErrorMessage(new MessagingException(originalMessage, "messaging exception"), Collections.emptyMap());
+
+    // when
+    Message messageTransformed = transformer.transform(message);
+
+    // then
+    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
+    assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
+  }
+
+  @Test
+  public void givenErrorMessageWithOriginalMessageNested_whenPassedToTransformer_thenValidMessageIsReturned() {
+    // given
+    Message<String> originalMessage = new GenericMessage<>("message with routing header", headers());
+    Message messageWrapped = new ErrorMessage(new RuntimeException("runtime exception"), Collections.emptyMap(), originalMessage);
+    Message message = new ErrorMessage(new RuntimeException("runtime exception"), Collections.emptyMap(), messageWrapped);
+
+    // when
+    Message messageTransformed = transformer.transform(message);
+
+    // then
+    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
+    assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
+  }
+
+  @Test
+  public void givenErrorMessageWithFailedMessageNested_whenPassedToTransformer_thenValidMessageIsReturned() {
+    // given
+    Message<String> originalMessage = new GenericMessage<>("message with routing header", headers());
+    Exception exceptionWrapped = new MessagingException(originalMessage, "messaging exception");
+    Message message = new ErrorMessage(new MessagingException("wrapping exception", exceptionWrapped), Collections.emptyMap());
+
+    // when
+    Message messageTransformed = transformer.transform(message);
+
+    // then
+    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
+    assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
+  }
 }

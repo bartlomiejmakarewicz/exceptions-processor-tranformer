@@ -111,4 +111,19 @@ public class ErrorHeaderExtractionTransformerTest {
     assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
+
+  @Test
+  public void givenMessageWithMessagingExceptionPayload_whenPassedToTransformer_thenValidMessageIsReturned() {
+    // given
+    Message<String> originalMessage = new GenericMessage<>("message with routing header", headers());
+    Exception messagingException = new MessagingException(originalMessage, "messaging exception");
+    Message message = new GenericMessage(messagingException, Collections.emptyMap());
+
+    // when
+    Message messageTransformed = transformer.transform(message);
+
+    // then
+    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
+    assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
+  }
 }

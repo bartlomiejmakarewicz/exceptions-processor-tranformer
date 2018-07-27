@@ -13,12 +13,15 @@ import org.springframework.stereotype.Component;
 @Component
 class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Message> {
 
-  @Value("${app.routing-header}")
-  private final String HEADER_KEY = "exchange";
+  private final String headerKey;
+
+  ErrorHeaderExtractionTransformer(@Value("${app.routing-header}") String headerKey) {
+    this.headerKey = headerKey;
+  }
 
   @Override
   public Message transform(Message message) {
-    if (message.getHeaders().containsKey(HEADER_KEY)) {
+    if (message.getHeaders().containsKey(headerKey)) {
       return message;
     }
     if (message instanceof ErrorMessage) {
@@ -26,7 +29,7 @@ class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Me
       String headerValue = getExchangeHeader(errorMessage);
       if (headerValue != null) {
         MessageHeaders headers = new MutableMessageHeaders(errorMessage.getHeaders());
-        headers.put(HEADER_KEY, headerValue);
+        headers.put(headerKey, headerValue);
         return new ErrorMessage(errorMessage.getPayload(), headers, errorMessage.getOriginalMessage());
       }
     }
@@ -34,7 +37,7 @@ class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Me
       String headerValue = getExchangeHeader((MessagingException) message.getPayload());
       if (headerValue != null) {
         MessageHeaders headers = new MutableMessageHeaders(message.getHeaders());
-        headers.put(HEADER_KEY, headerValue);
+        headers.put(headerKey, headerValue);
         return new GenericMessage<>(message.getPayload(), headers);
       }
     }
@@ -50,8 +53,8 @@ class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Me
       }
     }
     if (errorMessage.getOriginalMessage() != null) {
-      if (errorMessage.getOriginalMessage().getHeaders().containsKey(HEADER_KEY)) {
-        String headerValue = errorMessage.getOriginalMessage().getHeaders().get(HEADER_KEY, String.class);
+      if (errorMessage.getOriginalMessage().getHeaders().containsKey(headerKey)) {
+        String headerValue = errorMessage.getOriginalMessage().getHeaders().get(headerKey, String.class);
         if (headerValue != null) {
           return headerValue;
         }
@@ -67,8 +70,8 @@ class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Me
 
   private String getExchangeHeader(MessagingException messagingException) {
     if (messagingException.getFailedMessage() != null
-            && messagingException.getFailedMessage().getHeaders().containsKey(HEADER_KEY)) {
-      String headerValue = messagingException.getFailedMessage().getHeaders().get(HEADER_KEY, String.class);
+            && messagingException.getFailedMessage().getHeaders().containsKey(headerKey)) {
+      String headerValue = messagingException.getFailedMessage().getHeaders().get(headerKey, String.class);
       if (headerValue != null) {
         return headerValue;
       }

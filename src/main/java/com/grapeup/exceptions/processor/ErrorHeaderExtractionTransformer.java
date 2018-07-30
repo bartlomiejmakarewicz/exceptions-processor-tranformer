@@ -30,7 +30,7 @@ class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Me
       if (headerValue != null) {
         MessageHeaders headers = new MutableMessageHeaders(errorMessage.getHeaders());
         headers.put(headerKey, headerValue);
-        return new ErrorMessage(errorMessage.getPayload(), headers, errorMessage.getOriginalMessage());
+        return new GenericMessage<>("Error occurred", headers);
       }
     }
     if (message.getPayload() instanceof MessagingException) {
@@ -38,7 +38,7 @@ class ErrorHeaderExtractionTransformer implements GenericTransformer<Message, Me
       if (headerValue != null) {
         MessageHeaders headers = new MutableMessageHeaders(message.getHeaders());
         headers.put(headerKey, headerValue);
-        return new GenericMessage<>(message.getPayload(), headers);
+        return new GenericMessage<>("Error occurred", headers);
       }
     }
     throw new RuntimeException("Routing header is not present");

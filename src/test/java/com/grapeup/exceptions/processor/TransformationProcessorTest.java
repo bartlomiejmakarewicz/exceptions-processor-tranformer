@@ -59,8 +59,6 @@ public class TransformationProcessorTest {
     // then
     Message messageReceived = messageCollector.forChannel(processor.output()).poll();
     assertNotNull(messageReceived);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.readValue(messageReceived.getPayload().toString(), messageSent.getPayload().getClass());
   }
 
   @Test
@@ -74,8 +72,6 @@ public class TransformationProcessorTest {
     // then
     Message messageReceived = messageCollector.forChannel(processor.output()).poll();
     assertNotNull(messageReceived);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.readValue(messageReceived.getPayload().toString(), messageSent.getPayload().getClass());
   }
 
   @Test
@@ -90,7 +86,5 @@ public class TransformationProcessorTest {
     // then
     Message messageReceived = messageCollector.forChannel(processor.output()).poll();
     assertNotNull(messageReceived);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.readValue(messageReceived.getPayload().toString(), messageSent.getPayload().getClass());
   }
 }

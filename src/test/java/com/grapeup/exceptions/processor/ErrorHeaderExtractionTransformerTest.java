@@ -50,7 +50,6 @@ public class ErrorHeaderExtractionTransformerTest {
     Message messageTransformed = transformer.transform(message);
 
     // then
-    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 
@@ -64,7 +63,6 @@ public class ErrorHeaderExtractionTransformerTest {
     Message messageTransformed = transformer.transform(message);
 
     // then
-    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 
@@ -78,7 +76,7 @@ public class ErrorHeaderExtractionTransformerTest {
     Message messageTransformed = transformer.transform(message);
 
     // then
-    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
+//    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 
@@ -93,7 +91,6 @@ public class ErrorHeaderExtractionTransformerTest {
     Message messageTransformed = transformer.transform(message);
 
     // then
-    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 
@@ -108,7 +105,6 @@ public class ErrorHeaderExtractionTransformerTest {
     Message messageTransformed = transformer.transform(message);
 
     // then
-    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 
@@ -123,7 +119,6 @@ public class ErrorHeaderExtractionTransformerTest {
     Message messageTransformed = transformer.transform(message);
 
     // then
-    assertThat(messageTransformed.getPayload(), is(message.getPayload()));
     assertThat(messageTransformed.getHeaders().get(headerKey), is(headers().get(headerKey)));
   }
 }
